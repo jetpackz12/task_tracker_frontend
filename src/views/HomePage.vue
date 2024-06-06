@@ -3,7 +3,11 @@
     <div
       class="border border-warmBrown rounded-md p-5 bg-warmWhite w-[90%] sm:w-[70%] lg:w-[40%]"
     >
-      <h1 class="text-center text-2xl font-bold border border-x-0 border-t-0 border-b-warmBlack pb-1">Task Tracker</h1>
+      <h1
+        class="text-center text-2xl font-bold border border-x-0 border-t-0 border-b-warmBlack pb-1"
+      >
+        Task Tracker
+      </h1>
       <div class="border border-x-0 border-t-0 border-b-warmBrown py-2">
         <search-card @search="getSearchValue" />
       </div>
@@ -25,7 +29,7 @@
               link.url ?? 'hidden',
             ]"
             :key="link.label"
-            @click="getData(link.url)"
+            @click="getData(`/api${link.url[1]}`)"
             ><span v-html="link.label"></span
           ></a>
         </div>
@@ -56,10 +60,18 @@ export default {
   },
   methods: {
     getData(apiUrl) {
+      const params = {
+        search: this.searchValue,
+      };
+
       axios
-        .get(apiUrl)
+        .get(apiUrl, { params })
         .then((response) => {
           this.datas = response.data.tasks;
+          this.datas.links = this.datas.links.map((link) => ({
+            ...link,
+            url: link.url ? link.url.split("api") : null,
+          }));
         })
         .catch((error) => console.log(error));
     },
@@ -74,7 +86,11 @@ export default {
       axios
         .get("/api/v1/tasks/show", { params })
         .then((response) => {
-          this.datas = response.data;
+          this.datas = response.data.tasks;
+          this.datas.links = this.datas.links.map((link) => ({
+            ...link,
+            url: link.url ? link.url.split("api") : null,
+          }));
         })
         .catch((error) => console.log(error));
     },
